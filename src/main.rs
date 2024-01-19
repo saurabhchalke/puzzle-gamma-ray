@@ -188,8 +188,14 @@ fn main() {
 
     /* Enter your solution here */
 
-    let nullifier_hack = MNT4BigFr::from(0);
-    let secret_hack = MNT4BigFr::from(0);
+    // the solution is the find the symmetric point along the y-axis
+    // this vulnerability arises due to the usage of the MNT curve, which is based on the short Weierstrass form, and allows for both (x, y) & (x, -y) to lie on the curve
+    // We first find the symmetric point along the y-axis by negating the leaked_secret, but on the MNT6 curve, and wrapping the result in the MNT4 curve
+    let secret_hack = MNT4BigFr::from(
+        (MNT6BigFr::from(-1) * MNT6BigFr::from(leaked_secret.into_bigint())).into_bigint(),
+    );
+    let nullifier_hack =
+        <LeafH as CRHScheme>::evaluate(&leaf_crh_params, vec![secret_hack]).unwrap();
 
     /* End of solution */
 
